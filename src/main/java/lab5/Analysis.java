@@ -45,7 +45,7 @@ public class Analysis {
         int keyLength = findVigenereKeyLength(encText);
         System.out.println("Предполагаемая длина ключа: " + keyLength);
         String key = findVigenereKey(encText, keyLength);
-        System.out.println("Найденный ключ: " + key);
+        System.out.println("Найденный ключ: " + key + "\n");
         decryption.vigenereMethodDecrypt(encPath, decPath, key);
         String decText = tf.loadFromFile(decPath);
         System.out.println("Расшифрованный текст\n------------------------------------------");
@@ -55,17 +55,17 @@ public class Analysis {
     private static int findCaesarKey(String encryptedText) {
         double[] encryptedLetterProbability = calculateLetterProbabilityInText(encryptedText);
         int key = 0;
-        double bestScore = 1.0;
+        double bestDelta = 1.0;
         for (int N = 0; N < ALPHABET.length(); N++) {
-            double score = 0.0;
+            double delta = 0.0;
 
             for (int i = 0; i < ALPHABET.length(); i++) {
                 int encryptedPosRight = (i + N) % ALPHABET.length();
                 double differenceRight = encryptedLetterProbability[encryptedPosRight] - LETTER_PROBABILITIES[i];
-                score += Math.pow(differenceRight, 2);
+                delta += Math.pow(differenceRight, 2);
             }
-            if (score < bestScore) {
-                bestScore = score;
+            if (delta < bestDelta) {
+                bestDelta = delta;
                 key = N;
             }
         }
@@ -91,16 +91,16 @@ public class Analysis {
     }
 
     private static int findVigenereKeyLength(String encryptedText) {
-        int maxKeyLength = 20;
+        int maxKeyLength = 5;
         int bestLength = 1;
         double bestIC = 0.0;
 
-        for (int d = 1; d <= maxKeyLength; d++) {
+        for (int l = 1; l <= maxKeyLength; l++) {
             double avgIC = 0.0;
 
-            for (int group = 0; group < d; group++) {
+            for (int group = 0; group < l; group++) {
                 StringBuilder currentGroup = new StringBuilder();
-                for (int i = group; i < encryptedText.length(); i += d) {
+                for (int i = group; i < encryptedText.length(); i += l) {
                     char c = encryptedText.charAt(i);
                     if (ALPHABET.indexOf(c) != -1) {
                         currentGroup.append(c);
@@ -110,11 +110,11 @@ public class Analysis {
                     avgIC += calculateIndexOfCoincidence(currentGroup.toString());
                 }
             }
-            avgIC /= d;
+            avgIC /= l;
 
             if (avgIC > bestIC) {
                 bestIC = avgIC;
-                bestLength = d;
+                bestLength = l;
             }
         }
         return bestLength;

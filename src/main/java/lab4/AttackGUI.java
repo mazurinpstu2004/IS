@@ -112,6 +112,7 @@ public class AttackGUI extends AuthGUI {
                     String attempt = attack.dictionaryAttack();
                     if (attempt != null) {
                         passwordField.setText(attempt);
+                        authenticateButton.doClick();
                     } else {
                         JOptionPane.showMessageDialog(auth, "Словарная атака завершена");
                     }
@@ -128,6 +129,7 @@ public class AttackGUI extends AuthGUI {
                 String attempt = attack.bruteForceAttack(4);
                 if (attempt != null) {
                     passwordField.setText(attempt);
+                    authenticateButton.doClick();
                 } else {
                     JOptionPane.showMessageDialog(auth, "Перебор завершен");
                 }
@@ -141,7 +143,6 @@ public class AttackGUI extends AuthGUI {
                 String password = new String(passwordField.getPassword());
                 try {
                     String message = f.authorization(login, password);
-                    JOptionPane.showMessageDialog(null, message);
                     if (message.equals("Вы авторизованы")) {
                         auth.dispose();
                         if (login.equals("ADMIN")) {
@@ -154,6 +155,7 @@ public class AttackGUI extends AuthGUI {
                             String nextAttempt = attack.bruteForceAttack(5);
                             if (nextAttempt != null) {
                                 passwordField.setText(nextAttempt);
+                                authenticateButton.doClick();
                             } else {
                                 JOptionPane.showMessageDialog(auth, "Перебор завершен");
                             }
@@ -162,6 +164,7 @@ public class AttackGUI extends AuthGUI {
                                 String nextAttempt = attack.dictionaryAttack();
                                 if (nextAttempt != null) {
                                     passwordField.setText(nextAttempt);
+                                    authenticateButton.doClick();
                                 } else {
                                     JOptionPane.showMessageDialog(auth, "Словарная атака завершена");
                                 }
