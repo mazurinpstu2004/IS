@@ -45,9 +45,9 @@ public class DES {
         String[] keys = generateKeys(key);
 
         for (int i = 0; i < keys.length; i++) {
-            String expanded = expand(R0);
+            String expanded = expand(R0).substring(0, 32);
             String xored = xor(expanded, keys[i]);
-            String sBoxed = applySBoxes(xored);
+            String sBoxed = applySBoxes(xored + "000000000000000000000000000000000000000000000000");
             String permutedP = permuteP(sBoxed);
             String newR = xor(L0, permutedP);
 
@@ -65,9 +65,9 @@ public class DES {
         String[] keys = generateKeys(key);
 
         for (int i = keys.length-1; i >= 0; i--) {
-            String expanded = expand(R0);
+            String expanded = expand(R0).substring(0, 32);
             String xored = xor(expanded, keys[i]);
-            String sBoxed = applySBoxes(xored);
+            String sBoxed = applySBoxes(xored + "000000000000000000000000000000000000000000000000");
             String permutedP = permuteP(sBoxed);
             String newR = xor(L0, permutedP);
 
@@ -151,31 +151,23 @@ public class DES {
     }
 
     private String[] generateKeys(String key) {
-        String binaryKey = textToBinary(key);
+        String binaryKey = textToBinary(key); // Преобразуем ключ в бинарный формат
 
-        char[] pc1 = new char[56];
-        for (int i = 0; i < pc1.length; i++) {
-            pc1[i] = binaryKey.charAt(PC1[i] - 1);
+        // Убедимся, что длина ключа от 1 до 4 символов, преобразуем в 56 бит
+        if (binaryKey.length() < 56) {
+            binaryKey = String.format("%-56s", binaryKey).replace(' ', '0');  // Дополняем нулями до 56 бит
         }
 
-        String[] roundKeys = new String[16];
-        String c = new String(pc1, 0, 28);
-        String d = new String(pc1, 28, 28);
-
+        // Генерируем 6 раундовых ключей
+        String[] roundKeys = new String[6];
         for (int i = 0; i < roundKeys.length; i++) {
-            int shift = SHIFTS[i];
-            c = c.substring(shift) + c.substring(0, shift);
-            d = d.substring(shift) + d.substring(0, shift);
-
-            String combined = c + d;
-            char[] pc2 = new char[48];
-            for (int j = 0; j < pc2.length; j++) {
-                pc2[j] = combined.charAt(PC2[j] - 1);
-            }
-            roundKeys[i] = new String(pc2);
+            int shift = i + 1; // Сдвиг в зависимости от раунда
+            String shifted = binaryKey.substring(shift) + binaryKey.substring(0, shift);
+            roundKeys[i] = shifted.substring(0, 32); // Используем первые 32 бита
         }
         return roundKeys;
     }
+
 
     private String doFinalPermutation(String input) {
         char[] output = new char[64];
